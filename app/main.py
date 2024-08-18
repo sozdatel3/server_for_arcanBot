@@ -1,3 +1,4 @@
+from a2wsgi import ASGIMiddleware
 from fastapi import FastAPI
 from fastapi.routing import APIRouter
 
@@ -34,6 +35,8 @@ app.include_router(router)
 async def root():
     return {"message": "Welcome to the Telegram Bot Backend"}
 
+
+WSGI_APP = ASGIMiddleware(app)
 
 if __name__ == "__main__":
     import uvicorn
