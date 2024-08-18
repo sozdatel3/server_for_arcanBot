@@ -14,7 +14,7 @@ from app.core.config import LoggingRoute
 from app.init import init_db
 
 init_db()
-
+# ook
 app = FastAPI()
 router = APIRouter(route_class=LoggingRoute)
 
