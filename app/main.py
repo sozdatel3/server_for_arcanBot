@@ -36,7 +36,7 @@ async def root():
     return {"message": "Welcome to the Telegram Bot Backend"}
 
 
-WSGI_APP = ASGIMiddleware(app)
+application = ASGIMiddleware(app)
 
 if __name__ == "__main__":
     import uvicorn
