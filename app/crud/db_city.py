@@ -245,7 +245,7 @@ def del_task_city_transaction(user_id):
 
 
 @custom_logger.log_db_operation
-def get_all_task_city_transaction(user_id):
+def get_all_task_city_transaction():
     with get_db_connection() as conn:
         cursor = conn.cursor()
 
