@@ -13,7 +13,8 @@ def is_first_time_in_city(user_id: int) -> bool:
             "SELECT have_free_try FROM city WHERE user_id = ?", (user_id,)
         )
         result = cursor.fetchone()
-        return result is None or result["have_free_try"]
+        return result is None
+        # return result is None or result[0]
 
 
 @custom_logger.log_db_operation

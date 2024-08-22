@@ -1,5 +1,5 @@
 from a2wsgi import ASGIMiddleware
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.routing import APIRouter
 
 from app.api.endpoint import (
@@ -7,6 +7,7 @@ from app.api.endpoint import (
     api_cover,
     api_forecast,
     api_loyalty,
+    api_sheduler,
     api_stat,
     api_user,
 )
@@ -28,12 +29,31 @@ app.include_router(
     api_stat.router, prefix="/api/statistics", tags=["statistics"]
 )
 app.include_router(api_cover.router, prefix="/api/covers", tags=["covers"])
+app.include_router(
+    api_sheduler.router, prefix="/api/scheduler", tags=["schedulers"]
+)
 app.include_router(router)
 
 
 @app.get("/")
 async def root():
     return {"message": "Welcome to the Telegram Bot Backend"}
+
+
+@app.get("/payment-notification")
+async def payment_notification(request: Request):
+    # Получаем все параметры из запроса
+    params = dict(request.query_params)
+
+    # Выводим полученные данные
+    print("Received payment notification:")
+    for key, value in params.items():
+        print(f"{key}: {value}")
+
+    # Здесь должна быть логика проверки подписи и обработки платежа
+    # Пока просто возвращаем OK с номером счета
+    inv_id = params.get("InvId", "")
+    return f"OK{inv_id}"
 
 
 application = ASGIMiddleware(app, wait_time=5.0)

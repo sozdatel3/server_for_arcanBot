@@ -1,6 +1,7 @@
-from typing import Dict, Optional
+from datetime import datetime
+from typing import Dict
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Body, Query
 
 from app.crud import db_cover as covers_crud
 
@@ -14,29 +15,36 @@ def init_db():
 
 
 @router.post("/arcan_descriptions")
-def add_arcan_description(arcan: int, description: str):
-    covers_crud.add_arcan_description(arcan, description)
+def add_arcan_description(
+    arcan: int = Body(..., embed=True),
+    description: str = Body(..., embed=True),
+    month: str = Body(embed=True),
+):
+    covers_crud.add_arcan_description(arcan, description, month)
     return {"message": "Arcan description added successfully"}
 
 
-@router.get("/arcan_descriptions/{arcan}", response_model=Optional[str])
+# , response_model=Optional[str])
+@router.get("/arcan_descriptions/{arcan}")
 def get_arcan_description(arcan: int):
     description = covers_crud.get_arcan_description(arcan)
-    if description is None:
-        raise HTTPException(
-            status_code=404, detail="Arcan description not found"
-        )
+    # if description is None:
+    #     raise HTTPException(
+    #         status_code=404, detail="Arcan description not found"
+    #     )
     return description
 
 
 @router.post("/cover_users")
-def init_cover_user(user_id: int, arcan: int):
+def init_cover_user(
+    user_id: int = Body(..., embed=True), arcan: int = Body(..., embed=True)
+):
     covers_crud.init_cover_user(user_id, arcan)
     return {"message": "Cover user initialized successfully"}
 
 
 @router.put("/cover_users/{user_id}/like")
-def set_like_cover(user_id: int, like: bool):
+def set_like_cover(user_id: int, like: bool = Body(..., embed=True)):
     covers_crud.set_like_cover(user_id, like)
     return {"message": "Cover like status updated successfully"}
 
@@ -70,6 +78,13 @@ def record_transaction(user_id: int, amount: float):
     return {"message": "Transaction recorded successfully"}
 
 
+# @router.get("/arcan_descriptions", response_model=Dict[int, Dict])
+# def get_all_arcan_descriptions(month: str):
+#     return covers_crud.get_all_arcan_descriptions(month)
+
+
 @router.get("/arcan_descriptions", response_model=Dict[int, Dict])
-def get_all_arcan_descriptions(month: str):
+def get_all_arcan_descriptions(month: str = Query(None)):
+    if month is None:
+        month = datetime.now().strftime("%Y-%m")
     return covers_crud.get_all_arcan_descriptions(month)

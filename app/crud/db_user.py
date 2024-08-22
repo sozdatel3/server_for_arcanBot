@@ -77,6 +77,16 @@ def get_arcan(user_id: int):
 
 
 @custom_logger.log_db_operation
+def set_arcan(user_id: int, arcan: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        result = cursor.execute(
+            "UPDATE users SET arcan = ? WHERE user_id = ?", (arcan, user_id)
+        )
+        conn.commit()
+
+
+@custom_logger.log_db_operation
 def db_no_friend(id: int):
     with get_db_connection() as conn:
         cursor = conn.cursor()

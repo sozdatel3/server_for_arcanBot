@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Body, HTTPException, Query
 
 from app.crud import db_loyalty as loyalty_crud
 from app.schemas.sh_loyalty import LoyaltyCreate, LoyaltyStats, Transaction
@@ -15,7 +15,7 @@ def add_user_to_loyalty(user: LoyaltyCreate):
         return {"message": "User added to loyalty system successfully"}
     else:
         raise HTTPException(
-            status_code=400, detail="User already exists in loyalty system"
+            status_code=401, detail="User already exists in loyalty system"
         )
 
 
@@ -34,20 +34,24 @@ def update_user_balance(
 
 @router.post("/transactions/", response_model=dict)
 def record_transaction(
-    user_id: int,
-    amount: int,
-    bonus: int,
-    service: str,
-    expiration_days: Optional[int] = None,
+    user_id: int = Body(..., embed=True),
+    amount: int = Body(..., embed=True),
+    bonus: int = Body(..., embed=True),
+    service: str = Body(embed=True, default=""),
+    expiration_days: Optional[int] = Body(embed=True, default=None),
 ):
-    loyalty_crud.record_transaction(
-        user_id, amount, bonus, service, expiration_days
-    )
-    return {"message": "Transaction recorded successfully"}
+    try:
+        loyalty_crud.record_transaction(
+            user_id, amount, bonus, service, expiration_days
+        )
+        return {"message": "Transaction recorded successfully"}
+    except Exception as e:
+        print(f"Error recording transaction: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @router.get("/users/{user_id}/transactions", response_model=List[Transaction])
-def get_user_transactions(user_id: int, limit: Optional[int] = 10):
+def get_user_transactions(user_id: int, limit: Optional[int] = Query(10)):
     return loyalty_crud.get_user_transactions(user_id, limit)
 
 
@@ -61,8 +65,10 @@ def get_total_spent(user_id: int):
     return loyalty_crud.get_total_spent(user_id)
 
 
-@router.post("/promo_codes/use", response_model=dict)
-def use_promo_code(promo_code: str, new_user_id: Optional[int] = None):
+@router.post("/{promo_code}/use", response_model=dict)
+def use_promo_code(
+    promo_code: str, new_user_id: Optional[int] = Body(None, embed=True)
+):
     referrer_id = loyalty_crud.use_promo_code(promo_code, new_user_id)
     if referrer_id:
         return {
@@ -114,3 +120,8 @@ def get_loyalty_stats():
         total_balance=total_balance,
         total_spent=total_spent,
     )
+
+
+@router.get("/users/{user_id}/is_new", response_model=bool)
+def is_new_loyalty_user(user_id: int):
+    return loyalty_crud.user_exists(user_id)

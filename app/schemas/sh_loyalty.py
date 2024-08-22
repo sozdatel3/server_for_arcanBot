@@ -1,4 +1,3 @@
-from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel
@@ -19,7 +18,7 @@ class Transaction(BaseModel):
     amount: int
     bonus: int
     service: str
-    date: datetime
+    date: str
 
 
 class LoyaltyStats(BaseModel):

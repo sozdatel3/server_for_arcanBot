@@ -167,7 +167,49 @@ def init_db():
                 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
+                """
+        )
+
+        # Создание таблицы для описаний арканов по месяцам
+        cursor.execute(
             """
+        CREATE TABLE IF NOT EXISTS arcan_descriptions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            arcan INTEGER NOT NULL,
+            month TEXT NOT NULL,
+            description TEXT NOT NULL,
+            UNIQUE(arcan, month)
+        )
+        """
+        )
+
+        # Создание таблицы для отслеживания использования функции заставок
+        cursor.execute(
+            """
+        CREATE TABLE IF NOT EXISTS cover_users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            arcan INTEGER NOT NULL,
+            like_last BOOLEAN DEFAULT NULL,
+            has_paid BOOLEAN DEFAULT FALSE,
+            attempts_left INTEGER DEFAULT 0,
+            FOREIGN KEY (user_id) REFERENCES users(user_id),
+            UNIQUE(user_id)
+        )
+        """
+        )
+
+        # Создание таблицы для транзакций
+        cursor.execute(
+            """
+        CREATE TABLE IF NOT EXISTS cover_transactions (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            amount REAL NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        )
+        """
         )
 
         conn.commit()

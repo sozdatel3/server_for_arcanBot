@@ -49,8 +49,10 @@ def init_db():
 
 
 @custom_logger.log_db_operation
-def add_arcan_description(arcan: int, description: str):
-    month = datetime.now().strftime("%Y-%m")
+def add_arcan_description(arcan: int, description: str, month: str = None):
+    # month = datetime.now().strftime("%Y-%m")
+    if month is None:
+        month = datetime.now().strftime("%Y-%m")
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
@@ -70,7 +72,7 @@ def get_arcan_description(arcan: int) -> Optional[str]:
             (arcan, month),
         )
         result = cursor.fetchone()
-        return result["description"] if result else None
+        return result[0] if result else None
 
 
 @custom_logger.log_db_operation
