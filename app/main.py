@@ -12,6 +12,14 @@ from app.api.endpoint import (
     api_user,
 )
 from app.core.config import LoggingRoute
+from app.crud.db_city import (
+    add_task_city_transaction,
+    check_signature,
+    del_task_city_transaction,
+    get_all_task_city_transaction,
+    record_city_transaction,
+    set_unlimited_city_compatibility,
+)
 from app.init import init_db
 
 init_db()
@@ -44,16 +52,28 @@ async def root():
 async def payment_notification(request: Request):
     # Получаем все параметры из запроса
     params = dict(request.query_params)
-
+    SignatureValue = params.get("SignatureValue")
+    OutSum = params.get("OutSum")
+    user_id = params.get("Shp_id")
+    inv_id = params.get("InvId")
     # Выводим полученные данные
     print("Received payment notification:")
-    for key, value in params.items():
-        print(f"{key}: {value}")
+    if check_signature(inv_id, SignatureValue):
+        record_city_transaction(user_id, OutSum, True)
+        set_unlimited_city_compatibility(user_id)
+        add_task_city_transaction(user_id)
+    # inv_id = params.get("InvId", "")
+        return f"OK{inv_id}"
 
-    # Здесь должна быть логика проверки подписи и обработки платежа
-    # Пока просто возвращаем OK с номером счета
-    inv_id = params.get("InvId", "")
-    return f"OK{inv_id}"
+
+@app.get("/payment-task")
+async def payment_tasks():
+    return get_all_task_city_transaction()
+
+
+@app.post("/payment-task/{user_id}")
+async def del_payment_task(user_id: int):
+    return del_task_city_transaction(user_id)
 
 
 application = ASGIMiddleware(app, wait_time=5.0)

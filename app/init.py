@@ -19,6 +19,18 @@ def init_db():
         """
         )
 
+        # Создание таблицы задач
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS task_city_transactions (
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER,
+                FOREIGN KEY (user_id) REFERENCES users(user_id)
+            )
+        """
+        )
+                # status BOOL DEFAULT FALSE,
+        
         # Создание таблицы транзакций
         cursor.execute(
             """
@@ -26,7 +38,9 @@ def init_db():
                 id INTEGER PRIMARY KEY,
                 user_id INTEGER,
                 amount INTEGER,
-                date TIMESTAMP,
+                create_date TIMESTAMP,
+                pay_date TIMESTAMP,
+                status BOOL DEFAULT FALSE,
                 FOREIGN KEY (user_id) REFERENCES users(user_id)
             )
         """

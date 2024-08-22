@@ -13,7 +13,29 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     DEBUG: bool = True
 
+    ROBOKASSA_LOGIN: str
+    ROBOKASSA_PASSWORD1: str
+    ROBOKASSA_PASSWORD2: str
+    ROBOKASSA_TEST_PASSWORD1: str
+    ROBOKASSA_TEST_PASSWORD2: str
+
     model_config = SettingsConfigDict(env_file=".env")
+
+    @property
+    def ACTIVE_ROBOKASSA_PASSWORD1(self) -> str:
+        return (
+            self.ROBOKASSA_TEST_PASSWORD1
+            if self.DEBUG
+            else self.ROBOKASSA_PASSWORD1
+        )
+
+    @property
+    def ACTIVE_ROBOKASSA_PASSWORD2(self) -> str:
+        return (
+            self.ROBOKASSA_TEST_PASSWORD2
+            if self.DEBUG
+            else self.ROBOKASSA_PASSWORD2
+        )
 
 
 settings = Settings()

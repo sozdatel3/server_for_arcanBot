@@ -1,7 +1,8 @@
+import hashlib
 from datetime import datetime
 from typing import List, Optional
 
-from app.core.config import custom_logger
+from app.core.config import custom_logger, settings
 from app.core.database import get_db_connection
 
 
@@ -121,19 +122,74 @@ def get_checked_cities(user_id: int) -> List[str]:
         )
 
 
+# @custom_logger.log_db_operation
+# def record_city_transaction(user_id: int, amount: int, status: bool):
+#     with get_db_connection() as conn:
+#         cursor = conn.cursor()
+#         current_time = datetime.now()
+#         if not status:
+#             cursor.execute(
+#                 "INSERT INTO city_transactions (user_id, amount, create_date, status) VALUES (?, ?, ?, ?)",
+#                 (user_id, amount, current_time, status),
+#             )
+#         else:
+#             cursor.execute(
+#                 "INSERT INTO city_transactions (user_id, amount, pay_date, status) VALUES (?, ?, ?, ?)",
+#                 (user_id, amount, current_time, status),
+#             )
+#             cursor.execute(
+#                 "UPDATE city SET last_transaction_date = ? WHERE user_id = ?",
+#                 (current_time, user_id),
+#             )
+
+#         conn.commit()
+
+
 @custom_logger.log_db_operation
-def record_city_transaction(user_id: int, amount: int):
+def record_city_transaction(user_id: int, amount: int, status: bool):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         current_time = datetime.now()
+
+        # Check if a transaction exists for the user
         cursor.execute(
-            "INSERT INTO city_transactions (user_id, amount, date) VALUES (?, ?, ?)",
-            (user_id, amount, current_time),
+            "SELECT id FROM city_transactions WHERE user_id = ? ORDER BY create_date DESC LIMIT 1",
+            (user_id,),
         )
-        cursor.execute(
-            "UPDATE city SET last_transaction_date = ? WHERE user_id = ?",
-            (current_time, user_id),
-        )
+        existing_transaction = cursor.fetchone()
+
+        if existing_transaction:
+            # Update existing transaction
+            if not status:
+                cursor.execute(
+                    "UPDATE city_transactions SET amount = ?, create_date = ?, status = ? WHERE id = ?",
+                    (amount, current_time, status, existing_transaction[0]),
+                )
+            else:
+                cursor.execute(
+                    "UPDATE city_transactions SET amount = ?, pay_date = ?, status = ? WHERE id = ?",
+                    (amount, current_time, status, existing_transaction[0]),
+                )
+        else:
+            # Insert new transaction
+            if not status:
+                cursor.execute(
+                    "INSERT INTO city_transactions (user_id, amount, create_date, status) VALUES (?, ?, ?, ?)",
+                    (user_id, amount, current_time, status),
+                )
+            else:
+                cursor.execute(
+                    "INSERT INTO city_transactions (user_id, amount, pay_date, status) VALUES (?, ?, ?, ?)",
+                    (user_id, amount, current_time, status),
+                )
+
+        # Update city table if status is True (this remains the same)
+        if status:
+            cursor.execute(
+                "UPDATE city SET last_transaction_date = ? WHERE user_id = ?",
+                (current_time, user_id),
+            )
+
         conn.commit()
 
 
@@ -160,3 +216,60 @@ def get_free_tries_left(user_id: int) -> int:
         )
         result = cursor.fetchone()
         return result["have_free_try"] if result else 0
+
+
+@custom_logger.log_db_operation
+def add_task_city_transaction(user_id):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "INSERT INTO task_city_transactions (user_id) VALUES (?)",
+            (user_id),
+        )
+        # task_city_transactions
+        conn.commit()
+
+
+@custom_logger.log_db_operation
+def del_task_city_transaction(user_id):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "DELETE FROM task_city_transactions WHERE user_id = ?", (user_id,)
+        )
+
+        # task_city_transactions
+        conn.commit()
+
+
+@custom_logger.log_db_operation
+def get_all_task_city_transaction(user_id):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT user_id FROM task_city_transactions")
+
+        return cursor.fetchall()
+
+
+@custom_logger.log_db_operation
+def check_signature(transaction_id, signature_value) -> bool:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT user_id, amount FROM city_transaction WHERE id = ? and status = 0",
+            (transaction_id),
+        )
+        result = cursor.fetchone()
+        if result:
+            user_id = result["user_id"]
+            amount = result["amount"]
+            check_signature = hashlib.md5(
+                f"{amount}:{transaction_id}:{settings.ACTIVE_ROBOKASSA_PASSWORD2}:Shp_id= {user_id}".encode()
+            ).hexdigest()
+            if check_signature == signature_value:
+                return True
+        return False
+        # return result["have_free_try"] if result else 0
