@@ -319,8 +319,12 @@ def check_signature(transaction_id, signature_value) -> bool:
         if result:
             user_id = result["user_id"]
             amount = result["amount"]
+            print(
+                "HERE:\n"
+                f"{amount}:{transaction_id}:{settings.ACTIVE_ROBOKASSA_PASSWORD2}:Shp_id= {user_id}\n"
+            )
             check_signature = hashlib.md5(
-                f"{amount}:{transaction_id}:{settings.ACTIVE_ROBOKASSA_PASSWORD2}:Shp_id= {user_id}".encode()
+                f"{amount}:{transaction_id}:{settings.ACTIVE_ROBOKASSA_PASSWORD2}:Shp_id= {user_id} :".encode()
             ).hexdigest()
             if check_signature == signature_value:
                 print("GOOOOD CHECK")
