@@ -48,22 +48,39 @@ async def root():
     return {"message": "Welcome to the Telegram Bot Backend"}
 
 
+# @app.get("/payment-notification")
+# async def payment_notification(request: Request):
+#     # Получаем все параметры из запроса
+#     params = dict(request.query_params)
+#     SignatureValue = params.get("SignatureValue")
+#     OutSum = params.get("OutSum")
+#     user_id = params.get("Shp_id")
+#     inv_id = params.get("InvId")
+#     # Выводим полученные данные
+#     print("Received payment notification:")
+#     if check_signature(inv_id, SignatureValue):
+# record_city_transaction(user_id, OutSum, True)
+# set_unlimited_city_compatibility(user_id)
+# add_task_city_transaction(user_id)
+# # inv_id = params.get("InvId", "")
+# return f"OK{inv_id}"
 @app.get("/payment-notification")
 async def payment_notification(request: Request):
-    # Получаем все параметры из запроса
     params = dict(request.query_params)
-    SignatureValue = params.get("SignatureValue")
-    OutSum = params.get("OutSum")
-    user_id = params.get("Shp_id")
+    signature_value = params.get("SignatureValue")
+    out_sum = params.get("OutSum")
+    shp_id = params.get("Shp_id")
     inv_id = params.get("InvId")
-    # Выводим полученные данные
-    print("Received payment notification:")
-    if check_signature(inv_id, SignatureValue):
-        record_city_transaction(user_id, OutSum, True)
-        set_unlimited_city_compatibility(user_id)
-        add_task_city_transaction(user_id)
-        # inv_id = params.get("InvId", "")
+
+    print("Received payment notification:", params)
+
+    if check_signature(inv_id, signature_value, out_sum, shp_id):
+        record_city_transaction(shp_id, out_sum, True)
+        set_unlimited_city_compatibility(shp_id)
+        add_task_city_transaction(shp_id)
         return f"OK{inv_id}"
+    else:
+        return "BAD SIGNATURE"
 
 
 @app.get("/api/payment-task")

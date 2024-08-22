@@ -306,31 +306,42 @@ def get_all_task_city_transaction():
         return cursor.fetchall()
 
 
+# @custom_logger.log_db_operation
+# def check_signature(transaction_id, signature_value) -> bool:
+#     with get_db_connection() as conn:
+#         cursor = conn.cursor()
+#         cursor.execute(
+#             "SELECT user_id, amount FROM city_transactions WHERE id = ?",
+#             (transaction_id),
+#         )
+#         result = cursor.fetchone()
+#         print(f"REEES = {result}")
+#         if result:
+#             user_id = result["user_id"]
+#             amount = result["amount"]
+#             print(
+#                 f"HERE:{amount}:{transaction_id}:{settings.ACTIVE_ROBOKASSA_PASSWORD2}:Shp_id= {user_id}\n"
+#             )
+#             check_signature = hashlib.md5(
+#                 f"{amount}:{transaction_id}:{settings.ACTIVE_ROBOKASSA_PASSWORD2}:Shp_id= {user_id} :".encode()
+#             ).hexdigest()
+#             if check_signature == signature_value:
+#                 print("GOOOOD CHECK")
+#                 return True
+#         print("BAD CHECK")
+#         return False
+
+
 @custom_logger.log_db_operation
-def check_signature(transaction_id, signature_value) -> bool:
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        cursor.execute(
-            "SELECT user_id, amount FROM city_transactions WHERE id = ?",
-            (transaction_id),
-        )
-        result = cursor.fetchone()
-        print(f"REEES = {result}")
-        if result:
-            user_id = result["user_id"]
-            amount = result["amount"]
-            print(
-                f"HERE:{amount}:{transaction_id}:{settings.ACTIVE_ROBOKASSA_PASSWORD2}:Shp_id= {user_id}\n"
-            )
-            check_signature = hashlib.md5(
-                f"{amount}:{transaction_id}:{settings.ACTIVE_ROBOKASSA_PASSWORD2}:Shp_id= {user_id} :".encode()
-            ).hexdigest()
-            if check_signature == signature_value:
-                print("GOOOOD CHECK")
-                return True
-        print("BAD CHECK")
-        return False
-        # return result["have_free_try"] if result else 0
+def check_signature(inv_id, signature_value, out_sum, shp_id) -> bool:
+    # Примечание: out_sum и shp_id теперь передаются в функцию
+    check_string = f"{out_sum}:{inv_id}:{settings.ACTIVE_ROBOKASSA_PASSWORD2}:Shp_id={shp_id}"
+    check_signature = hashlib.md5(check_string.encode()).hexdigest().upper()
+    print(f"Check string: {check_string}")
+    print(f"Calculated signature: {check_signature}")
+    print(f"Received signature: {signature_value}")
+    return check_signature == signature_value.upper()
+    # return result["have_free_try"] if result else 0
 
 
 # @custom_logger.log_db_operation
