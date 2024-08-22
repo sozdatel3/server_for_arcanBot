@@ -277,3 +277,17 @@ def check_signature(transaction_id, signature_value) -> bool:
         print("BAD CHECK")
         return False
         # return result["have_free_try"] if result else 0
+
+
+@custom_logger.log_db_operation
+def get_last_transaction_id() -> int:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT id FROM city_transactions ORDER BY id DESC LIMIT 1"
+        )
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        else:
+            return 0  # Возвращаем 0, если транзакций нет
