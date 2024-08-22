@@ -54,12 +54,11 @@ async def get_checked_cities(user_id: int):
     return cities_crud.get_checked_cities(user_id)
 
 
-@router.post("/transactions", response_model=dict)
+@router.post("/transactions", response_model=int)
 async def create_city_transaction(
     user_id: int = Body(...), amount: int = Body(...)
 ):
-    cities_crud.record_city_transaction(user_id, amount)
-    return {"message": "City transaction recorded successfully"}
+    return cities_crud.record_city_transaction(user_id, amount)
 
 
 # @router.get("/transactions/last")

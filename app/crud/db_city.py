@@ -146,6 +146,53 @@ def get_checked_cities(user_id: int) -> List[str]:
 #         conn.commit()
 
 
+# @custom_logger.log_db_operation
+# def record_city_transaction(user_id: int, amount: int, status: bool = False):
+#     with get_db_connection() as conn:
+#         cursor = conn.cursor()
+#         current_time = datetime.now()
+
+#         # Check if a transaction exists for the user
+#         cursor.execute(
+#             "SELECT id FROM city_transactions WHERE user_id = ? ORDER BY create_date DESC LIMIT 1",
+#             (user_id,),
+#         )
+#         existing_transaction = cursor.fetchone()
+
+#         if existing_transaction:
+#             # Update existing transaction
+#             if not status:
+#                 cursor.execute(
+#                     "UPDATE city_transactions SET amount = ?, create_date = ?, status = ? WHERE id = ?",
+#                     (amount, current_time, status, existing_transaction[0]),
+#                 )
+#             else:
+#                 cursor.execute(
+#                     "UPDATE city_transactions SET amount = ?, pay_date = ?, status = ? WHERE id = ?",
+#                     (amount, current_time, status, existing_transaction[0]),
+#                 )
+#         else:
+#             # Insert new transaction
+#             if not status:
+#                 cursor.execute(
+#                     "INSERT INTO city_transactions (user_id, amount, create_date, status) VALUES (?, ?, ?, ?)",
+#                     (user_id, amount, current_time, status),
+#                 )
+#             else:
+#                 cursor.execute(
+#                     "INSERT INTO city_transactions (user_id, amount, pay_date, status) VALUES (?, ?, ?, ?)",
+#                     (user_id, amount, current_time, status),
+#                 )
+
+#         # Update city table if status is True (this remains the same)
+#         if status:
+#             cursor.execute(
+#                 "UPDATE city SET last_transaction_date = ? WHERE user_id = ?",
+#                 (current_time, user_id),
+#             )
+
+
+#         conn.commit()
 @custom_logger.log_db_operation
 def record_city_transaction(user_id: int, amount: int, status: bool = False):
     with get_db_connection() as conn:
@@ -161,15 +208,16 @@ def record_city_transaction(user_id: int, amount: int, status: bool = False):
 
         if existing_transaction:
             # Update existing transaction
+            transaction_id = existing_transaction[0]
             if not status:
                 cursor.execute(
                     "UPDATE city_transactions SET amount = ?, create_date = ?, status = ? WHERE id = ?",
-                    (amount, current_time, status, existing_transaction[0]),
+                    (amount, current_time, status, transaction_id),
                 )
             else:
                 cursor.execute(
                     "UPDATE city_transactions SET amount = ?, pay_date = ?, status = ? WHERE id = ?",
-                    (amount, current_time, status, existing_transaction[0]),
+                    (amount, current_time, status, transaction_id),
                 )
         else:
             # Insert new transaction
@@ -183,6 +231,7 @@ def record_city_transaction(user_id: int, amount: int, status: bool = False):
                     "INSERT INTO city_transactions (user_id, amount, pay_date, status) VALUES (?, ?, ?, ?)",
                     (user_id, amount, current_time, status),
                 )
+            transaction_id = cursor.lastrowid
 
         # Update city table if status is True (this remains the same)
         if status:
@@ -192,6 +241,8 @@ def record_city_transaction(user_id: int, amount: int, status: bool = False):
             )
 
         conn.commit()
+
+    return transaction_id
 
 
 @custom_logger.log_db_operation
@@ -291,6 +342,7 @@ def check_signature(transaction_id, signature_value) -> bool:
 #             return result[0]
 #         else:
 #             return 0  # Возвращаем 0, если транзакций нет
+
 
 async def get_last_transaction_id_from_db() -> int:
     with get_db_connection() as conn:
