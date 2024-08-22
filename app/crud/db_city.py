@@ -146,7 +146,7 @@ def get_checked_cities(user_id: int) -> List[str]:
 
 
 @custom_logger.log_db_operation
-def record_city_transaction(user_id: int, amount: int, status: bool):
+def record_city_transaction(user_id: int, amount: int, status: bool = False):
     with get_db_connection() as conn:
         cursor = conn.cursor()
         current_time = datetime.now()

@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Dict
 
 from fastapi import APIRouter, Body, Query
 
@@ -83,7 +82,8 @@ def record_transaction(user_id: int, amount: float):
 #     return covers_crud.get_all_arcan_descriptions(month)
 
 
-@router.get("/arcan_descriptions", response_model=Dict[int, Dict])
+# @router.get("/arcan_descriptions", response_model=Dict[int, Dict])
+@router.get("/arcan_descriptions")
 def get_all_arcan_descriptions(month: str = Query(None)):
     if month is None:
         month = datetime.now().strftime("%Y-%m")

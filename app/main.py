@@ -62,16 +62,16 @@ async def payment_notification(request: Request):
         record_city_transaction(user_id, OutSum, True)
         set_unlimited_city_compatibility(user_id)
         add_task_city_transaction(user_id)
-    # inv_id = params.get("InvId", "")
+        # inv_id = params.get("InvId", "")
         return f"OK{inv_id}"
 
 
-@app.get("/payment-task")
+@app.get("/api/payment-task")
 async def payment_tasks():
     return get_all_task_city_transaction()
 
 
-@app.post("/payment-task/{user_id}")
+@app.post("/api/payment-task/{user_id}")
 async def del_payment_task(user_id: int):
     return del_task_city_transaction(user_id)
 
