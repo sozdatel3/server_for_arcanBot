@@ -2,6 +2,7 @@ import hashlib
 from datetime import datetime
 from typing import List, Optional
 
+# from venv import logger
 from app.core.config import custom_logger, settings
 from app.core.database import get_db_connection
 
@@ -263,6 +264,7 @@ def check_signature(transaction_id, signature_value) -> bool:
             (transaction_id),
         )
         result = cursor.fetchone()
+        print(f"REEES = {result}")
         if result:
             user_id = result["user_id"]
             amount = result["amount"]
@@ -270,6 +272,8 @@ def check_signature(transaction_id, signature_value) -> bool:
                 f"{amount}:{transaction_id}:{settings.ACTIVE_ROBOKASSA_PASSWORD2}:Shp_id= {user_id}".encode()
             ).hexdigest()
             if check_signature == signature_value:
+                print("GOOOOD CHECK")
                 return True
+        print("BAD CHECK")
         return False
         # return result["have_free_try"] if result else 0
