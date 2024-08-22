@@ -259,7 +259,7 @@ def check_signature(transaction_id, signature_value) -> bool:
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
-            "SELECT user_id, amount FROM city_transactions WHERE id = ? and status = 0",
+            "SELECT user_id, amount FROM city_transactions WHERE id = ?",
             (transaction_id),
         )
         result = cursor.fetchone()
