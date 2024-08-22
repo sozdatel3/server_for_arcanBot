@@ -74,10 +74,13 @@ async def create_city_transaction(
 @router.get("/transactions/last")
 async def get_last_transaction_id():
     try:
-        last_id = await get_last_transaction_id_from_db()
+        last_id = await cities_crud.get_last_transaction_id_from_db()
         return {"last_transaction_id": last_id}
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Internal server error: {str(e)}"
+        )
+
 
 @router.get("/transactions/{user_id}", response_model=List[CityTransaction])
 async def get_user_transactions(user_id: int, limit: int = 5):
