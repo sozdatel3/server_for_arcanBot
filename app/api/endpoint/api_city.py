@@ -62,11 +62,20 @@ async def create_city_transaction(
     return {"message": "City transaction recorded successfully"}
 
 
+# @router.get("/transactions/last")
+# async def get_last_transaction_id():
+#     try:
+#         last_id = get_last_transaction_id()
+#         return last_id
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
 @router.get("/transactions/last")
 async def get_last_transaction_id():
     try:
-        last_id = get_last_transaction_id()
-        return last_id
+        last_id = await get_last_transaction_id_from_db()
+        return {"last_transaction_id": last_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
