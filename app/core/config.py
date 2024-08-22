@@ -19,7 +19,7 @@ class Settings(BaseSettings):
     ROBOKASSA_TEST_PASSWORD1: str
     ROBOKASSA_TEST_PASSWORD2: str
 
-    model_config = SettingsConfigDict(env_file=".env")
+    model_config = SettingsConfigDict(env_file=".env", extra="allow")
 
     @property
     def ACTIVE_ROBOKASSA_PASSWORD1(self) -> str:
