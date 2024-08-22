@@ -277,7 +277,7 @@ def add_task_city_transaction(user_id):
 
         cursor.execute(
             "INSERT INTO task_city_transactions (user_id) VALUES (?)",
-            (user_id),
+            (user_id,),
         )
         # task_city_transactions
         conn.commit()
