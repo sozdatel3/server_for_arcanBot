@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    DEBUG: bool = True
+    DEBUG: bool = False
 
     ROBOKASSA_LOGIN: str
     ROBOKASSA_PASSWORD1: str
