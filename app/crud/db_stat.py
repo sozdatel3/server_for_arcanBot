@@ -68,7 +68,7 @@ def get_statistics(period: str) -> Dict:
             """
             SELECT COUNT(*), SUM(amount)
             FROM city_transactions
-            WHERE date >= ? AND date <= ?
+            WHERE pay_date >= ? AND pay_date <= ?
         """,
             (start_date, end_date),
         )
