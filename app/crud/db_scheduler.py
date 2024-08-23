@@ -168,7 +168,7 @@ def get_users_not_in_forecasts():
 
 
 @custom_logger.log_db_operation
-def get_unique_users_count():
+def get_unique_users_coun():
     with get_db_connection() as conn:
         cursor = conn.cursor()
         return cursor.execute(
@@ -179,4 +179,3 @@ def get_unique_users_count():
         """
         ).fetchone()[0]
         # print("REEEES= ", cursor.fetchone()[0])
-
