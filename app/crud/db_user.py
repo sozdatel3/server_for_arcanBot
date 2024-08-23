@@ -27,22 +27,6 @@ def add_user(
         conn.commit()
 
 
-@custom_logger.log_db_operation
-def get_unique_users_count() -> int:
-    with get_db_connection() as conn:
-        cursor = conn.cursor()
-        res = cursor.execute(
-            """
-            SELECT COUNT(DISTINCT user_id)
-            FROM users
-            WHERE user_id <> 740905109 AND user_id <> 1358227914;
-            """
-        ).fetchone()
-        # print("REEEES= ", cursor.fetchone()[0])
-        if res:
-            return res[0]
-        else:
-            return 0
 
 
 @custom_logger.log_db_operation

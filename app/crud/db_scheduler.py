@@ -165,3 +165,18 @@ def get_users_not_in_forecasts():
         AND forecast_reminder = FALSE
         """
         ).fetchall()
+
+
+@custom_logger.log_db_operation
+def get_unique_users_count():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        return cursor.execute(
+            """
+        SELECT COUNT(DISTINCT user_id)
+            FROM users
+            WHERE user_id <> 740905109 AND user_id <> 1358227914;
+        """
+        ).fetchone()[0]
+        # print("REEEES= ", cursor.fetchone()[0])
+
