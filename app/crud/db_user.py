@@ -61,7 +61,6 @@ def get_all_users() -> List[Dict[str, Any]]:
             """
             SELECT user_id, chat_id, username
             FROM users
-            WHERE user_id <> 740905109 AND user_id <> 1358227914;
             """
         )
         results = cursor.fetchall()
