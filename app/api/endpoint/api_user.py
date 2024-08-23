@@ -94,10 +94,18 @@ def get_first_sphere(user_id: int):
     sphere = users_crud.get_first_sphere(user_id)
     return {"first_sphere": sphere}
 
-@router.get("/unique_users_count", response_model=dict)
-def get_unique_users_count():
-    count = users_crud.get_unique_users_count()
-    return {"unique_users_count": count}
+
+# @router.get("/unique_users_count", response_model=dict)
+# def get_unique_users_count():
+#     count = users_crud.get_unique_users_count()
+#     return {"unique_users_count": count}
+
+
+@router.get("/unique_users_count")
+async def get_unique_users_count():
+    count = await users_crud.get_unique_users_count()
+    return count
+
 
 @router.put("/{user_id}/first_sphere", response_model=dict)
 def set_first_sphere(user_id: int, sphere: int = Body(..., embed=True)):

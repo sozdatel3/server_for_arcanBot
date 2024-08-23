@@ -31,15 +31,18 @@ def add_user(
 def get_unique_users_count() -> int:
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(
+        res = cursor.execute(
             """
             SELECT COUNT(DISTINCT user_id)
             FROM users
             WHERE user_id <> 740905109 AND user_id <> 1358227914;
             """
-        )
-        print("REEEES= ", cursor.fetchone()[0])
-        return cursor.fetchone()[0]
+        ).fetchone()
+        # print("REEEES= ", cursor.fetchone()[0])
+        if res:
+            return res[0]
+        else:
+            return 0
 
 
 @custom_logger.log_db_operation
