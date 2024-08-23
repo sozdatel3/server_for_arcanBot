@@ -122,7 +122,7 @@ def get_services_statistics(
         """
         SELECT amount
         FROM city_transactions
-        WHERE date >= ? AND date <= ?
+        WHERE pay_date >= ? AND pay_date <= ?
     """,
         (start_date, end_date),
     )
