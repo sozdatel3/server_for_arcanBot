@@ -38,11 +38,12 @@ def record_transaction(
     amount: int = Body(..., embed=True),
     bonus: int = Body(..., embed=True),
     service: str = Body(embed=True, default=""),
+    comment: str = Body(embed=True, default=""),
     expiration_days: Optional[int] = Body(embed=True, default=None),
 ):
     try:
         loyalty_crud.record_transaction(
-            user_id, amount, bonus, service, expiration_days
+            user_id, amount, bonus, service,comment, expiration_days
         )
         return {"message": "Transaction recorded successfully"}
     except Exception as e:

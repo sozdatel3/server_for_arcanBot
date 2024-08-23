@@ -62,3 +62,8 @@ async def get_users_for_useful_message():
 async def update_useful_sent_status(user_id: int):
     db_scheduler.update_useful_sent_status(user_id)
     return {"status": "success"}
+
+
+@router.get("/not-in-forecast")
+async def get_users_not_in_forecast():
+    return db_scheduler.get_users_not_in_forecasts()

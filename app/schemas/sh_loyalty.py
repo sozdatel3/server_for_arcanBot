@@ -18,6 +18,7 @@ class Transaction(BaseModel):
     amount: int
     bonus: int
     service: str
+    comment: str
     date: str
 
 

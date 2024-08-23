@@ -143,14 +143,15 @@ def get_user_transactions(
     cursor = connection.cursor()
     if limit is None:
         cursor.execute(
-            "SELECT amount, bonus, service, date FROM transactions WHERE user_id = ? ORDER BY date DESC",
+            "SELECT amount, bonus, service, comment, date FROM transactions WHERE user_id = ? ORDER BY date DESC",
             (user_id,),
         )
     else:
         cursor.execute(
-            "SELECT amount, bonus, service, date FROM transactions WHERE user_id = ? ORDER BY date DESC LIMIT ?",
+            "SELECT amount, bonus, service, comment, date FROM transactions WHERE user_id = ? ORDER BY date DESC LIMIT ?",
             (user_id, limit),
         )
+    # print("HERE 2\n", [dict(row) for row in cursor.fetchall()])
     return [dict(row) for row in cursor.fetchall()]
 
 
@@ -241,14 +242,16 @@ def record_transaction(
     amount: int,
     bonus: int,
     service: str,
+    comment: str,
     expiration_days: Optional[int] = None,
     connection=None,
 ):
     cursor = connection.cursor()
     cursor.execute(
-        "INSERT INTO transactions (user_id, amount, bonus, service, date) VALUES (?, ?, ?, ?, ?)",
-        (user_id, amount, bonus, service, datetime.now()),
+        "INSERT INTO transactions (user_id, amount, bonus, service, comment, date) VALUES (?, ?, ?, ?, ?, ?)",
+        (user_id, amount, bonus, service, comment, datetime.now()),
     )
+    print("HERE", user_id, amount, bonus, service, comment, datetime.now())
     cursor.execute(
         """
         UPDATE loyalty 

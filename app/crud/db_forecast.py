@@ -140,3 +140,5 @@ def get_useful_sent(user_id: int) -> Optional[int]:
         )
         result = cursor.fetchone()
         return result[0] if result else None
+
+

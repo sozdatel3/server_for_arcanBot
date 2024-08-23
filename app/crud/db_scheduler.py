@@ -151,3 +151,17 @@ def update_useful_sent_status(user_id):
             (user_id,),
         )
         conn.commit()
+
+
+@custom_logger.log_db_operation
+def get_users_not_in_forecasts():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        return cursor.execute(
+            """
+        SELECT user_id
+        FROM users
+        WHERE user_id NOT IN (SELECT user_id FROM monthly_forecasts)
+        AND forecast_reminder = FALSE
+        """
+        ).fetchall()

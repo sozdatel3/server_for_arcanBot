@@ -29,8 +29,8 @@ def init_db():
             )
         """
         )
-                # status BOOL DEFAULT FALSE,
-        
+        # status BOOL DEFAULT FALSE,
+
         # Создание таблицы транзакций
         cursor.execute(
             """
@@ -122,6 +122,7 @@ def init_db():
                 amount INTEGER,
                 service TEXT,
                 bonus INTEGER DEFAULT 0,
+                comment TEXT,
                 date TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(user_id)
             )
