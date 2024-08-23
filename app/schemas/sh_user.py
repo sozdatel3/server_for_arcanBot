@@ -9,6 +9,11 @@ class UserCreate(BaseModel):
     chat_id: int
     referral_code: Optional[str] = None
 
+class UserBasic(BaseModel):
+    user_id: int
+    chat_id: int
+    username: str
+
 
 class UserUpdate(BaseModel):
     birth_date: Optional[str] = None

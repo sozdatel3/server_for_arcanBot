@@ -27,6 +27,17 @@ def add_user(
         conn.commit()
 
 
+@custom_logger.log_db_operation
+def get_all_users() -> List[Dict[str, Any]]:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT user_id, chat_id, username
+            FROM users
+            """
+        )
+        return cursor.fetchall()
 
 
 @custom_logger.log_db_operation

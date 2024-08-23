@@ -5,7 +5,7 @@ from fastapi import APIRouter, Body, HTTPException
 from app.crud import db_user as users_crud
 from app.crud.db_loyalty import add_user_to_loyalty
 from app.crud.db_scheduler import get_unique_users_coun
-from app.schemas.sh_user import User, UserCreate
+from app.schemas.sh_user import User, UserBasic, UserCreate
 
 router = APIRouter()
 
@@ -24,6 +24,12 @@ def create_user(user: UserCreate = Body(...)):
     )
     add_user_to_loyalty(user.user_id)
     return {"message": "User created successfully"}
+
+
+@router.get("/all", response_model=List[UserBasic])
+async def get_all_users():
+    users = users_crud.get_all_users()
+    return [UserBasic(**user) for user in users]
 
 
 @router.get("/unique-users-count")
