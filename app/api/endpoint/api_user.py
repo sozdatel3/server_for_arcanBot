@@ -26,10 +26,22 @@ def create_user(user: UserCreate = Body(...)):
     return {"message": "User created successfully"}
 
 
+# @router.get("/all", response_model=List[UserBasic])
+# async def get_all_users():
+#     users = users_crud.get_all_users()
+#     return [UserBasic(**user) for user in users]
+
+
 @router.get("/all", response_model=List[UserBasic])
 async def get_all_users():
     users = users_crud.get_all_users()
-    return [UserBasic(**user) for user in users]
+    result = []
+    for user in users:
+        try:
+            result.append(UserBasic(**user))
+        except Exception as e:
+            print(f"Error processing user: {user}. Error: {e}")
+    return result
 
 
 @router.get("/unique-users-count")

@@ -27,6 +27,32 @@ def add_user(
         conn.commit()
 
 
+# @custom_logger.log_db_operation
+# def get_all_users() -> List[Dict[str, Any]]:
+#     with get_db_connection() as conn:
+#         cursor = conn.cursor()
+#         cursor.execute(
+#             """
+#             SELECT user_id, chat_id, username
+#             FROM users
+#             """
+#         )
+#         return cursor.fetchall()
+
+# @custom_logger.log_db_operation
+# def get_all_users() -> List[Dict[str, Any]]:
+#     with get_db_connection() as conn:
+#         cursor = conn.cursor()
+#         cursor.execute(
+#             """
+#             SELECT user_id, chat_id, username
+#             FROM users
+#             WHERE user_id <> 740905109 AND user_id <> 1358227914;
+#             """
+#         )
+#         return [dict(row) for row in cursor.fetchall()]
+
+
 @custom_logger.log_db_operation
 def get_all_users() -> List[Dict[str, Any]]:
     with get_db_connection() as conn:
@@ -35,9 +61,14 @@ def get_all_users() -> List[Dict[str, Any]]:
             """
             SELECT user_id, chat_id, username
             FROM users
+            WHERE user_id <> 740905109 AND user_id <> 1358227914;
             """
         )
-        return cursor.fetchall()
+        results = cursor.fetchall()
+        print(f"Fetched {len(results)} users")
+        users = [dict(row) for row in results]
+        print(f"First user: {users[0] if users else 'No users'}")
+        return users
 
 
 @custom_logger.log_db_operation
