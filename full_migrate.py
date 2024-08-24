@@ -160,9 +160,9 @@ def migrate_city_transaction(old_cursor, new_cursor):
 
 def migrate_nastuxa(conn):
     cursor = conn.cursor()
-    cursor.execute("UPADATE users SET arcan = 14 WHERE user_id = 817011039")
+    cursor.execute("UPDATE users SET arcan = 14 WHERE user_id = 817011039")
     cursor.execute(
-        "UPADATE monthly_forecasts SET arcan = 14 WHERE user_id = 817011039"
+        "UPDATE monthly_forecasts SET arcan = 14 WHERE user_id = 817011039"
     )
     conn.commit()
 
