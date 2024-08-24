@@ -93,10 +93,10 @@ def set_birth_date(chat_id: int, birth_date: str):
 def is_user_exists(user_id: int) -> bool:
     with get_db_connection() as conn:
         cursor = conn.cursor()
-        cursor.execute(
-            "SELECT chat_id FROM users WHERE user_id = ?", (user_id,)
+        result = cursor.execute(
+            "SELECT user_id FROM users WHERE user_id = ?", (user_id,)
         )
-        return cursor.fetchone() is not None
+        return result.fetchone() is not None
 
 
 @custom_logger.log_db_operation
