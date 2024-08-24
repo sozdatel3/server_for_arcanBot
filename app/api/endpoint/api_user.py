@@ -85,9 +85,13 @@ def check_birth_date_known(user_id: int):
 
 @router.put("/{user_id}/arcan", response_model=dict)
 def set_user_arcan(user_id: int, arcan: int = Body(..., embed=True)):
-    check_exist = users_crud.is_user_exists(user_id)
-    if not check_exist:
-        raise HTTPException(status_code=404, detail="User not found")
+    # check_exist = users_crud.is_user_exists(user_id)
+    if not users_crud.is_user_exists(user_id):
+        users_crud.add_user("", user_id, user_id, None)
+        add_user_to_loyalty(user_id)
+
+    # if not check_exist:
+    # raise HTTPException(status_code=404, detail="User not found")
     users_crud.set_arcan(user_id, arcan)
     return {"arcan": arcan}
 
