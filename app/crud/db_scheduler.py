@@ -3,6 +3,20 @@ from datetime import datetime
 from app.core.config import custom_logger
 from app.core.database import get_db_connection
 
+# @custom_logger.log_db_operation
+# def get_forecast_users(current_month):
+#     column_name = f"{current_month}_send"
+#     with get_db_connection() as conn:
+#         cursor = conn.cursor()
+#         cursor.execute(
+#             f"""
+#             SELECT DISTINCT user_id, arcan
+#             FROM monthly_forecasts
+#             WHERE {column_name} = FALSE AND subscription = TRUE
+#             """
+#         )
+#         return cursor.fetchall()
+
 
 @custom_logger.log_db_operation
 def get_forecast_users(current_month):
@@ -11,9 +25,10 @@ def get_forecast_users(current_month):
         cursor = conn.cursor()
         cursor.execute(
             f"""
-            SELECT user_id, arcan
+            SELECT DISTINCT ON (user_id) user_id, arcan
             FROM monthly_forecasts
             WHERE {column_name} = FALSE AND subscription = TRUE
+            ORDER BY user_id, arcan
             """
         )
         return cursor.fetchall()
