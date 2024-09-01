@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Dict, Optional
 
 from app.core.config import custom_logger
@@ -63,8 +63,11 @@ def add_arcan_description(arcan: int, description: str, month: str = None):
 
 
 @custom_logger.log_db_operation
-def get_arcan_description(arcan: int) -> Optional[str]:
-    month = datetime.now().strftime("%Y-%m")
+def get_arcan_description(arcan: int, use_next=False) -> Optional[str]:
+    if use_next:
+        month = (datetime.now() + timedelta(days=30)).strftime("%Y-%m")
+    else:
+        month = datetime.now().strftime("%Y-%m")
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(

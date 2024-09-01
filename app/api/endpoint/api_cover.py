@@ -25,12 +25,9 @@ def add_arcan_description(
 
 # , response_model=Optional[str])
 @router.get("/arcan_descriptions/{arcan}")
-def get_arcan_description(arcan: int):
-    description = covers_crud.get_arcan_description(arcan)
-    # if description is None:
-    #     raise HTTPException(
-    #         status_code=404, detail="Arcan description not found"
-    #     )
+def get_arcan_description(arcan: int, use_next: int = Query(0)):
+    description = covers_crud.get_arcan_description(arcan, use_next == 1)
+
     return description
 
 
