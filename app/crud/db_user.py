@@ -59,7 +59,7 @@ def get_all_users() -> List[Dict[str, Any]]:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT user_id, chat_id, username
+            SELECT DISTINCT user_id, chat_id, username
             FROM users
             """
         )
@@ -72,7 +72,7 @@ def get_all_users_list() -> List[Dict[str, Any]]:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT user_id, chat_id, username
+            SELECT DISTINCT user_id, chat_id, username
             FROM users
             """
         )
