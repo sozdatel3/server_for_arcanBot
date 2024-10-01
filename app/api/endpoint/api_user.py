@@ -44,6 +44,60 @@ async def get_unique_users_count():
     return count
 
 
+@router.get("/all_users_list", response_model=List[UserBasic])
+async def get_all_users_list_endpoint():
+    users = users_crud.get_all_users_list()
+    return [UserBasic(**user) for user in users]
+
+
+@router.get("/all_users", response_model=List[UserBasic])
+async def get_all_users_endpoint():
+    users = users_crud.get_all_users()
+    return [UserBasic(**user) for user in users]
+
+
+@router.get("/gift_dates", response_model=List[dict])
+def get_gift_dates():
+    return users_crud.get_gift_date()
+
+
+@router.get("/active_users", response_model=List[dict])
+def get_active_users():
+    return users_crud.get_active_users()
+
+
+@router.get("/inactive_users", response_model=List[dict])
+def get_inactive_users():
+    return users_crud.get_not_active_users()
+
+
+@router.get("/button_users", response_model=List[dict])
+def get_button_users():
+    return users_crud.get_button_users()
+
+
+@router.get("/reference_users", response_model=List[dict])
+def get_reference_users():
+    return users_crud.get_reference_users()
+
+
+@router.get("/march_users_count", response_model=dict)
+def get_march_users_count():
+    count = users_crud.get_number_all_users_march()
+    return {"march_users_count": count}
+
+
+@router.get("/past_users_count", response_model=dict)
+def get_past_users_count():
+    count = users_crud.get_number_all_users_past()
+    return {"past_users_count": count}
+
+
+@router.get("/comp_send_false_users", response_model=List[int])
+def get_comp_send_false_users():
+    return users_crud.get_comp_send_false_and_no_one_per()
+
+
 @router.get("/{user_id}", response_model=User)
 def get_user(user_id: int):
     user = users_crud.get_user(user_id)
@@ -188,48 +242,6 @@ def check_received_all_files(user_id: int):
     return {"received_all_files": status}
 
 
-@router.get("/gift_dates", response_model=List[dict])
-def get_gift_dates():
-    return users_crud.get_gift_date()
-
-
-@router.get("/active_users", response_model=List[dict])
-def get_active_users():
-    return users_crud.get_active_users()
-
-
-@router.get("/inactive_users", response_model=List[dict])
-def get_inactive_users():
-    return users_crud.get_not_active_users()
-
-
-@router.get("/button_users", response_model=List[dict])
-def get_button_users():
-    return users_crud.get_button_users()
-
-
-@router.get("/reference_users", response_model=List[dict])
-def get_reference_users():
-    return users_crud.get_reference_users()
-
-
-@router.get("/march_users_count", response_model=dict)
-def get_march_users_count():
-    count = users_crud.get_number_all_users_march()
-    return {"march_users_count": count}
-
-
-@router.get("/past_users_count", response_model=dict)
-def get_past_users_count():
-    count = users_crud.get_number_all_users_past()
-    return {"past_users_count": count}
-
-
-@router.get("/comp_send_false_users", response_model=List[int])
-def get_comp_send_false_users():
-    return users_crud.get_comp_send_false_and_no_one_per()
-
-
 @router.put("/{chat_id}/comp_send", response_model=dict)
 def set_comp_send(chat_id: int, set_value: bool = Body(...)):
     users_crud.set_comp_send_true(chat_id, set_value)
@@ -246,15 +258,3 @@ def set_user_time(chat_id: int, time: str = Body(...)):
 def add_next_month_info(chat_id: int, info: str = Body(...)):
     users_crud.add_info(chat_id, info)
     return {"message": "Next month info added successfully"}
-
-
-@router.get("/all_users", response_model=List[UserBasic])
-async def get_all_users_endpoint():
-    users = users_crud.get_all_users()
-    return [UserBasic(**user) for user in users]
-
-
-@router.get("/all_users_list", response_model=List[UserBasic])
-async def get_all_users_list_endpoint():
-    users = users_crud.get_all_users_list()
-    return [UserBasic(**user) for user in users]
