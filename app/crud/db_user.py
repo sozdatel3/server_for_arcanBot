@@ -66,13 +66,26 @@ def get_all_users() -> List[Dict[str, Any]]:
         return [dict(row) for row in cursor.fetchall()]
 
 
+# @custom_logger.log_db_operation
+# def get_all_users_list() -> List[Dict[str, Any]]:
+#     with get_db_connection() as conn:
+#         cursor = conn.cursor()
+#         cursor.execute(
+#             """
+#             SELECT DISTINCT user_id, chat_id, username
+#             FROM users
+#             """
+#         )
+#         return [dict(row) for row in cursor.fetchall()]
+
+
 @custom_logger.log_db_operation
 def get_all_users_list() -> List[Dict[str, Any]]:
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(
             """
-            SELECT DISTINCT user_id, chat_id, username
+            SELECT DISTINCT user_id, chat_id, COALESCE(username, '') as username
             FROM users
             """
         )

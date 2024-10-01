@@ -4,15 +4,16 @@ from pydantic import BaseModel
 
 
 class UserCreate(BaseModel):
-    username: str
+    username: Optional[str] = None
     user_id: int
     chat_id: int
     referral_code: Optional[str] = None
 
+
 class UserBasic(BaseModel):
     user_id: int
     chat_id: int
-    username: str
+    username: Optional[str] = None
 
 
 class UserUpdate(BaseModel):
@@ -24,7 +25,7 @@ class UserUpdate(BaseModel):
 
 class User(BaseModel):
     id: int
-    username: str
+    username: Optional[str] = None
     user_id: int
     chat_id: int
     arcan: Optional[int] = None
