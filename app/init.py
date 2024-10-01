@@ -172,6 +172,17 @@ def init_db():
             """
         )
 
+        # Создание таблицы для рассылок
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS broadcasts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER UNIQUE,
+                FOREIGN KEY (user_id) REFERENCES users (user_id)
+            )
+            """
+        )
+
         # Создание таблицы для транзакций
         cursor.execute(
             """

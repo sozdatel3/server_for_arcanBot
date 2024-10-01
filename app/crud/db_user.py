@@ -63,11 +63,20 @@ def get_all_users() -> List[Dict[str, Any]]:
             FROM users
             """
         )
-        results = cursor.fetchall()
-        print(f"Fetched {len(results)} users")
-        users = [dict(row) for row in results]
-        print(f"First user: {users[0] if users else 'No users'}")
-        return users
+        return [dict(row) for row in cursor.fetchall()]
+
+
+@custom_logger.log_db_operation
+def get_all_users_list() -> List[Dict[str, Any]]:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            """
+            SELECT user_id, chat_id, username
+            FROM users
+            """
+        )
+        return [dict(row) for row in cursor.fetchall()]
 
 
 @custom_logger.log_db_operation
