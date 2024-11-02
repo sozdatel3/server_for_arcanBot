@@ -25,10 +25,10 @@ def get_forecast_users(current_month):
         cursor = conn.cursor()
         cursor.execute(
             f"""
-            SELECT DISTINCT ON (user_id) user_id, arcan
+            SELECT user_id, arcan
             FROM monthly_forecasts
             WHERE {column_name} = FALSE AND subscription = TRUE
-            ORDER BY user_id, arcan
+            GROUP BY user_id
             """
         )
         return cursor.fetchall()
