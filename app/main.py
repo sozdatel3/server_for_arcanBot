@@ -1,4 +1,4 @@
-from a2wsgi import ASGIMiddleware
+# from a2wsgi import ASGIMiddleware
 from fastapi import FastAPI, Request
 from fastapi.routing import APIRouter
 
@@ -12,14 +12,21 @@ from app.api.endpoint import (
     api_user,
 )
 from app.core.config import LoggingRoute
+from app.crud import db_loyalty
 from app.crud.db_city import (
     add_task_city_transaction,
+    add_task_product_transaction,
     check_signature,
     del_task_city_transaction,
+    del_task_product_transaction,
     get_all_task_city_transaction,
+    get_all_task_product_transaction,
+    get_transaction_type,
     record_city_transaction,
+    # move_pre_transaction_to_transaction,
     set_unlimited_city_compatibility,
 )
+from app.crud.db_loyalty import move_pre_transaction_to_transaction
 from app.init import init_db
 
 init_db()
@@ -48,7 +55,6 @@ async def root():
     return {"message": "Welcome to the Telegram Bot Backend"}
 
 
-
 @app.get("/payment-notification")
 async def payment_notification(request: Request):
     params = dict(request.query_params)
@@ -56,13 +62,18 @@ async def payment_notification(request: Request):
     out_sum = params.get("OutSum")
     shp_id = params.get("Shp_id")
     inv_id = params.get("InvId")
-
-    print("Received payment notification:", params)
+    # description = params.get("Description")
+    # print("Received payment notification:", params)
 
     if check_signature(inv_id, signature_value, out_sum, shp_id):
-        record_city_transaction(shp_id, out_sum, True)
-        set_unlimited_city_compatibility(shp_id)
-        add_task_city_transaction(shp_id)
+        transaction_type = get_transaction_type(inv_id)
+        if transaction_type == "city":
+            record_city_transaction(shp_id, out_sum, True)
+            set_unlimited_city_compatibility(shp_id)
+            add_task_city_transaction(shp_id)
+        elif transaction_type == "product":
+            move_pre_transaction_to_transaction(inv_id)
+            add_task_product_transaction(inv_id, shp_id)
         return f"OK{inv_id}"
     else:
         return "BAD SIGNATURE"
@@ -73,12 +84,27 @@ async def payment_tasks():
     return get_all_task_city_transaction()
 
 
+@app.get("/api/payment-task-product")
+async def payment_tasks_product():
+    return get_all_task_product_transaction()
+
+
 @app.post("/api/payment-task/{user_id}")
 async def del_payment_task(user_id: int):
     return del_task_city_transaction(user_id)
 
 
-application = ASGIMiddleware(app, wait_time=5.0)
+@app.post("/api/payment-task-product/{inv_id}")
+async def del_payment_task_product(inv_id: int):
+    return del_task_product_transaction(inv_id)
+
+
+@app.get("/api/transaction-by-id/{inv_id}")
+async def get_transaction_by_id(inv_id: int):
+    return db_loyalty.get_transaction_by_id(inv_id)
+
+
+# application = ASGIMiddleware(app, wait_time=5.0)
 
 if __name__ == "__main__":
     import uvicorn

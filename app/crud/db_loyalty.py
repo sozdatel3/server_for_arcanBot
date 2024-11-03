@@ -274,6 +274,142 @@ def record_transaction(
 
 @custom_logger.log_db_operation
 @with_db_connection
+def record_pre_transaction(
+    user_id: int,
+    amount: int,
+    bonus: int = 0,
+    service: str = "",
+    comment: str = "",
+    # expiration_days: Optional[int] = None,
+    connection=None,
+):
+    cursor = connection.cursor()
+
+    # Получаем максимальный ID из обеих таблиц
+    cursor.execute(
+        """
+    SELECT COALESCE(MAX(id), 0) as max_id FROM (
+        SELECT id FROM city_transactions
+        UNION ALL
+        SELECT id FROM transactions
+        UNION ALL
+        SELECT id FROM pre_transactions
+    ) combined_ids
+    """
+    )
+    max_id = cursor.fetchone()["max_id"]
+    if bonus > 0:
+        bonus = -int(bonus)
+    if bonus == 0:
+        bonus = int(amount * 0.10)
+
+    cursor.execute(
+        "INSERT INTO pre_transactions (id, user_id, amount, bonus, service, comment, date) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        (max_id + 1, user_id, amount, bonus, service, comment, datetime.now()),
+    )
+    # print("HERE", user_id, amount, bonus, service, comment, datetime.now())
+
+    connection.commit()
+    return max_id + 1
+
+
+@custom_logger.log_db_operation
+@with_db_connection
+def move_pre_transaction_to_transaction(transaction_id: int, connection=None):
+    cursor = connection.cursor()
+
+    # Получаем данные из pre_transaction
+    cursor.execute(
+        """
+        SELECT user_id, amount, bonus, service, comment, date 
+        FROM pre_transactions 
+        WHERE id = ?
+        """,
+        (transaction_id,),
+    )
+    pre_trans = cursor.fetchone()
+
+    if not pre_trans:
+        return False
+
+    try:
+        # Записываем в transactions
+        cursor.execute(
+            """
+            INSERT INTO transactions 
+            (id, user_id, amount, bonus, service, comment, date) 
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                transaction_id,
+                pre_trans["user_id"],
+                pre_trans["amount"],
+                pre_trans["bonus"],
+                pre_trans["service"],
+                pre_trans["comment"],
+                pre_trans["date"],
+            ),
+        )
+
+        # Обновляем баланс в loyalty
+        cursor.execute(
+            """
+            UPDATE loyalty 
+            SET balance = balance + ?,
+                total_spent = total_spent + ?, 
+                count_of_transaction = count_of_transaction + 1,
+                last_transaction_date = ?
+            WHERE user_id = ?
+            """,
+            (
+                pre_trans["bonus"],
+                pre_trans["amount"],
+                pre_trans["date"],
+                pre_trans["user_id"],
+            ),
+        )
+
+        # Проверяем и генерируем промо-код если нужно
+        if not get_promo_code(pre_trans["user_id"], connection=connection):
+            generate_promo_code(pre_trans["user_id"], connection=connection)
+
+        # # Удаляем запись из pre_transactions
+        # cursor.execute(
+        #     "DELETE FROM pre_transactions WHERE id = ?",
+        #     (transaction_id,)
+        # )
+
+        connection.commit()
+        return True
+
+    except Exception as e:
+        print(f"Error moving transaction {transaction_id}: {str(e)}")
+        connection.rollback()
+        return False
+
+
+@custom_logger.log_db_operation
+@with_db_connection
+def get_transaction_by_id(
+    transaction_id: int, connection=None
+) -> Optional[dict]:
+    cursor = connection.cursor()
+
+    # Проверяем в таблице transactions
+    cursor.execute(
+        """
+        SELECT id, user_id, amount, bonus, service, comment, date
+        FROM transactions 
+        WHERE id = ?
+        """,
+        (transaction_id,),
+    )
+
+    return cursor.fetchone()
+
+
+@custom_logger.log_db_operation
+@with_db_connection
 def get_promo_code(user_id: int, connection=None) -> Optional[str]:
     cursor = connection.cursor()
     cursor.execute(

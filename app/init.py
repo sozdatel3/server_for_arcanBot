@@ -29,6 +29,16 @@ def init_db():
             )
         """
         )
+        # Создание таблицы задач
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS task_product_transactions (
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER,
+                FOREIGN KEY (user_id) REFERENCES users(user_id)
+            )
+        """
+        )
         # status BOOL DEFAULT FALSE,
 
         # Создание таблицы транзакций
@@ -45,6 +55,19 @@ def init_db():
             )
         """
         )
+        # cursor.execute(
+        #     """
+        #     CREATE TABLE IF NOT EXISTS product_transactions (
+        #         id INTEGER PRIMARY KEY,
+        #         user_id INTEGER,
+        #         amount INTEGER,
+        #         create_date TIMESTAMP,
+        #         pay_date TIMESTAMP,
+        #         status BOOL DEFAULT FALSE,
+        #         FOREIGN KEY (user_id) REFERENCES users(user_id)
+        #     )
+        # """
+        # )
 
         # Создание таблицы пользователей с полем chat_id
         cursor.execute(
@@ -117,6 +140,20 @@ def init_db():
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS transactions (
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER,
+                amount INTEGER,
+                service TEXT,
+                bonus INTEGER DEFAULT 0,
+                comment TEXT,
+                date TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(user_id)
+            )
+        """
+        )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS pre_transactions (
                 id INTEGER PRIMARY KEY,
                 user_id INTEGER,
                 amount INTEGER,

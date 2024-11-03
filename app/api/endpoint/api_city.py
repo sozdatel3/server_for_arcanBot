@@ -3,6 +3,7 @@ from typing import List
 from fastapi import APIRouter, Body, HTTPException
 
 from app.crud import db_city as cities_crud
+from app.crud import db_loyalty as loyalty_crud
 from app.schemas.sh_city import CityTransaction
 
 router = APIRouter()
@@ -56,9 +57,18 @@ async def get_checked_cities(user_id: int):
 
 @router.post("/transactions", response_model=int)
 async def create_city_transaction(
-    user_id: int = Body(...), amount: int = Body(...)
+    user_id: int = Body(...),
+    amount: int = Body(...),
+    type: str = Body(...),
+    bonus: int = Body(embed=True, default=0),
+    service: str = Body(embed=True, default=""),
 ):
-    return cities_crud.record_city_transaction(user_id, amount)
+    if type == "city":
+        return cities_crud.record_city_transaction(user_id, amount)
+    else:
+        return loyalty_crud.record_pre_transaction(
+            user_id, amount, bonus, service
+        )
 
 
 # @router.get("/transactions/last")

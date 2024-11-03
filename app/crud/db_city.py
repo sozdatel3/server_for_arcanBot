@@ -204,6 +204,7 @@ def record_city_transaction(user_id: int, amount: int, status: bool = False):
             "SELECT id FROM city_transactions WHERE user_id = ? ORDER BY create_date DESC LIMIT 1",
             (user_id,),
         )
+
         existing_transaction = cursor.fetchone()
 
         if existing_transaction:
@@ -220,18 +221,32 @@ def record_city_transaction(user_id: int, amount: int, status: bool = False):
                     (amount, current_time, status, transaction_id),
                 )
         else:
-            # Insert new transaction
-            if not status:
-                cursor.execute(
-                    "INSERT INTO city_transactions (user_id, amount, create_date, status) VALUES (?, ?, ?, ?)",
-                    (user_id, amount, current_time, status),
-                )
-            else:
-                cursor.execute(
-                    "INSERT INTO city_transactions (user_id, amount, pay_date, status) VALUES (?, ?, ?, ?)",
-                    (user_id, amount, current_time, status),
-                )
-            transaction_id = cursor.lastrowid
+            # Получаем максимальный ID из обеих таблиц
+            cursor.execute(
+                """
+                SELECT COALESCE(MAX(id), 0) as max_id FROM (
+                    SELECT id FROM city_transactions
+                    UNION ALL
+                    SELECT id FROM transactions
+                    UNION ALL
+                    SELECT id FROM pre_transactions
+                    ) combined_ids
+            """
+            )
+        max_id = cursor.fetchone()["max_id"]
+
+        # Insert new transaction
+        if not status:
+            cursor.execute(
+                "INSERT INTO city_transactions (id, user_id, amount, create_date, status) VALUES (?, ?, ?, ?, ?)",
+                (max_id + 1, user_id, amount, current_time, status),
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO city_transactions (id, user_id, amount, pay_date, status) VALUES (?, ?, ?, ?, ?)",
+                (max_id + 1, user_id, amount, current_time, status),
+            )
+        transaction_id = cursor.lastrowid
 
         # Update city table if status is True (this remains the same)
         if status:
@@ -243,6 +258,29 @@ def record_city_transaction(user_id: int, amount: int, status: bool = False):
         conn.commit()
 
     return transaction_id
+
+
+@custom_logger.log_db_operation
+def get_transaction_type(transaction_id: int) -> str:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        # Проверяем наличие ID в таблице city_transactions
+        cursor.execute(
+            "SELECT 1 FROM city_transactions WHERE id = ?", (transaction_id,)
+        )
+        if cursor.fetchone():
+            return "city"
+
+        # Проверяем наличие ID в таблице pre_transactions
+        cursor.execute(
+            "SELECT 1 FROM pre_transactions WHERE id = ?", (transaction_id,)
+        )
+        if cursor.fetchone():
+            return "product"
+
+        # Если ID не найден ни в одной таблице
+        return ""
 
 
 @custom_logger.log_db_operation
@@ -284,6 +322,19 @@ def add_task_city_transaction(user_id):
 
 
 @custom_logger.log_db_operation
+def add_task_product_transaction(id: int, user_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "INSERT INTO task_product_transactions (id, user_id) VALUES (?, ?)",
+            (id, user_id),
+        )
+        # task_city_transactions
+        conn.commit()
+
+
+@custom_logger.log_db_operation
 def del_task_city_transaction(user_id):
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -297,11 +348,35 @@ def del_task_city_transaction(user_id):
 
 
 @custom_logger.log_db_operation
+def del_task_product_transaction(inv_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute(
+            "DELETE FROM task_product_transactions WHERE id = ?",
+            (inv_id,),
+        )
+
+        # task_city_transactions
+        conn.commit()
+
+
+@custom_logger.log_db_operation
 def get_all_task_city_transaction():
     with get_db_connection() as conn:
         cursor = conn.cursor()
 
         cursor.execute("SELECT user_id FROM task_city_transactions")
+
+        return cursor.fetchall()
+
+
+@custom_logger.log_db_operation
+def get_all_task_product_transaction():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM task_product_transactions")
 
         return cursor.fetchall()
 
