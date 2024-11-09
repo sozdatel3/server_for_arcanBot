@@ -4,6 +4,7 @@ from fastapi.routing import APIRouter
 
 from app.api.endpoint import (
     api_city,
+    api_competition,
     api_cover,
     api_forecast,
     api_loyalty,
@@ -46,6 +47,9 @@ app.include_router(
 app.include_router(api_cover.router, prefix="/api/covers", tags=["covers"])
 app.include_router(
     api_sheduler.router, prefix="/api/scheduler", tags=["schedulers"]
+)
+app.include_router(
+    api_competition.router, prefix="/api/competition", tags=["competition"]
 )
 app.include_router(router)
 

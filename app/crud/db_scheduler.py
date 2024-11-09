@@ -190,7 +190,7 @@ def get_unique_users_coun():
             """
         SELECT COUNT(DISTINCT user_id)
             FROM users
-            WHERE user_id <> 740905109 AND user_id <> 1358227914;
         """
         ).fetchone()[0]
+        # WHERE user_id <> 740905109 AND user_id <> 1358227914;
         # print("REEEES= ", cursor.fetchone()[0])

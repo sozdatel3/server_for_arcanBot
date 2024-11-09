@@ -1,9 +1,10 @@
-from typing import List
+from typing import Any, List
 
 from fastapi import APIRouter, Body, HTTPException
 
 from app.crud import db_city as cities_crud
 from app.crud import db_loyalty as loyalty_crud
+from app.crud import db_user as user_crud
 from app.schemas.sh_city import CityTransaction
 
 router = APIRouter()
@@ -24,6 +25,36 @@ async def add_user_to_city(user_id: int = Body(..., embed=True)):
 async def use_free_try(user_id: int):
     cities_crud.set_free_try_used(user_id)
     return {"message": "Free try used successfully"}
+
+
+@router.get("/all-users-free-try", response_model=dict)
+async def get_all_users_free_try(all: bool = False):
+    users = user_crud.get_all_users()
+    for user in users:
+        if cities_crud.is_first_time_in_city(user["user_id"]):
+            cities_crud.add_user_to_city_table(user["user_id"])
+
+    users = cities_crud.get_all_city_users_and_free_tries(all)
+    return {"users": [dict(user) for user in users]}
+    # return {"message": "Free try used successfully"}
+
+
+@router.put("/request-recived/{user_id}", response_model=dict)
+async def set_request_recived(user_id: int):
+    cities_crud.set_recive_request(user_id)
+    return {"message": "Successfully"}
+
+
+@router.put("/set-user-answer/{user_id}", response_model=dict)
+async def set_user_answer(user_id: int, answer: dict[str, Any] = Body(...)):
+    cities_crud.set_answer(user_id, answer["answer"])
+    return {"message": "Successfully"}
+
+
+@router.get("/all-answers", response_model=dict)
+async def get_all_answers():
+    return cities_crud.get_all_answers()
+    # return {"message": "Free try used successfully"}
 
 
 @router.get("/has_free_try/{user_id}", response_model=bool)

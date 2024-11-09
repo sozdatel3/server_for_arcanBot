@@ -20,6 +20,50 @@ def is_first_time_in_city(user_id: int) -> bool:
 
 
 @custom_logger.log_db_operation
+def set_recive_request(user_id: int) -> bool:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE city SET recive_request = TRUE WHERE user_id = ?",
+            (user_id,),
+        )
+        conn.commit()
+
+
+@custom_logger.log_db_operation
+def set_answer(user_id: int, answer: str) -> bool:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE city SET choose_answer = ? WHERE user_id = ?",
+            (answer, user_id),
+        )
+        conn.commit()
+
+
+@custom_logger.log_db_operation
+def get_all_answers() -> bool:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT choose_answer FROM city")
+        return cursor.fetchall()
+
+
+@custom_logger.log_db_operation
+def get_all_city_users_and_free_tries(all: bool = False):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        if not all:
+            cursor.execute(
+                "SELECT user_id, have_free_try FROM city WHERE recive_request = ?",
+                (False,),
+            )
+        else:
+            cursor.execute("SELECT user_id, have_free_try FROM city")
+        return cursor.fetchall()
+
+
+@custom_logger.log_db_operation
 def which_arcan(user_id: int) -> Optional[int]:
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -30,7 +74,7 @@ def which_arcan(user_id: int) -> Optional[int]:
 
 @custom_logger.log_db_operation
 def add_user_to_city_table(user_id: int):
-    print("here")
+    # print("here")
     with get_db_connection() as conn:
         cursor = conn.cursor()
         cursor.execute(

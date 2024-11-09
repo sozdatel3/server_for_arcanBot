@@ -144,6 +144,14 @@ def set_user_arcan(user_id: int, arcan: int = Body(..., embed=True)):
     return {"arcan": arcan}
 
 
+@router.put("/phone-number/{user_id}", response_model=dict)
+def set_user_phone_number(
+    user_id: int, phone_number: str = Body(..., embed=True)
+):
+    users_crud.set_phone_number(user_id, phone_number)
+    return {"phone_number": phone_number}
+
+
 @router.get("/{user_id}/arcan", response_model=dict)
 def get_user_arcan(user_id: int):
     arcan = users_crud.get_arcan(user_id)

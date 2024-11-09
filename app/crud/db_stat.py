@@ -152,6 +152,36 @@ def get_services_statistics(
 
 
 @custom_logger.log_db_operation
+def incriment_stat_counter(counter_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        # Проверяем существует ли счетчик
+        cursor.execute("SELECT id FROM stat WHERE id = ?", (counter_id,))
+        exists = cursor.fetchone()
+
+        if not exists:
+            # Если счетчик не существует, создаем его
+            cursor.execute(
+                "INSERT INTO stat (id, counter) VALUES (?, 0)", (counter_id,)
+            )
+
+        # Увеличиваем значение счетчика
+        cursor.execute(
+            "UPDATE stat SET counter = counter + 1 WHERE id = ?", (counter_id,)
+        )
+        conn.commit()
+
+
+@custom_logger.log_db_operation
+def get_all_count():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COALESCE(SUM(counter), 0) FROM stat")
+        count = cursor.fetchone()[0]
+        return count
+
+
+@custom_logger.log_db_operation
 def count_checked_cities(cursor) -> int:
     cursor.execute(
         """
@@ -203,3 +233,41 @@ def format_statistics_response(stats: Dict) -> str:
         response += f"{i}. {service} - {amount} рублей, купили {count} раз\n"
 
     return response
+
+
+@custom_logger.log_db_operation
+def get_important_mes_id(mes_name: str) -> int | None:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT message_id FROM important_mes_id WHERE mes_name = ?",
+            (mes_name,),
+        )
+
+        res = cursor.fetchone()
+        if res:
+            return res[0]
+        else:
+            return None
+
+
+@custom_logger.log_db_operation
+def set_important_mes_id(mes_name: str, message_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT message_id FROM important_mes_id WHERE mes_name = ?",
+            (mes_name,),
+        )
+        if cursor.fetchone():
+            cursor.execute(
+                "UPDATE important_mes_id SET message_id = ? WHERE mes_name = ?",
+                (message_id, mes_name),
+            )
+        else:
+            cursor.execute(
+                "INSERT INTO important_mes_id (mes_name, message_id) VALUES (?, ?)",
+                (mes_name, message_id),
+            )
+        conn.commit()
+        return message_id

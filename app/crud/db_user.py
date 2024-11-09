@@ -112,6 +112,17 @@ def set_birth_date(chat_id: int, birth_date: str):
 
 
 @custom_logger.log_db_operation
+def set_phone_number(chat_id: int, phone_number: str):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE users SET phone_number = ? WHERE chat_id = ?",
+            (phone_number, chat_id),
+        )
+        conn.commit()
+
+
+@custom_logger.log_db_operation
 def is_user_exists(user_id: int) -> bool:
     with get_db_connection() as conn:
         cursor = conn.cursor()

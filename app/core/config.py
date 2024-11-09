@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     ROBOKASSA_PASSWORD2: str
     ROBOKASSA_TEST_PASSWORD1: str
     ROBOKASSA_TEST_PASSWORD2: str
+    SECRET_WORD: str
 
     model_config = SettingsConfigDict(env_file=".env", extra="allow")
 

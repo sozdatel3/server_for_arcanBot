@@ -18,6 +18,38 @@ def init_db():
             )
         """
         )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS stat (
+                id INTEGER PRIMARY KEY,
+                counter INTEGER DEFAULT 0
+            )
+        """
+        )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS important_mes_id (
+                id INTEGER PRIMARY KEY,
+                message_id INTEGER DEFAULT 0,
+                mes_name TEXT default NULL
+            )
+        """
+        )
+        cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS new_year_competition (
+                user_id INTEGER PRIMARY KEY,
+                inst_username TEXT default NULL,
+                subscribe BOOLEAN DEFAULT FALSE,
+                count_of_friends INTEGER DEFAULT 0,
+                should_send_message BOOLEAN DEFAULT FALSE,
+                refer_id INTEGER DEFAULT NULL,
+                secret_link TEXT DEFAULT NULL,
+                FOREIGN KEY (user_id) REFERENCES users(user_id),
+                FOREIGN KEY (refer_id) REFERENCES users(user_id)
+            )
+        """
+        )
 
         # Создание таблицы задач
         cursor.execute(
@@ -340,6 +372,12 @@ def init_db():
             pass
         try:
             cursor.execute(
+                "ALTER TABLE users ADD COLUMN inst_username TEXT DEFAULT NULL"
+            )
+        except:
+            pass
+        try:
+            cursor.execute(
                 "ALTER TABLE users ADD COLUMN march_send BOOLEAN DEFAULT FALSE"
             )
         except:
@@ -432,7 +470,25 @@ def init_db():
             pass
         try:
             cursor.execute(
+                "ALTER TABLE users ADD COLUMN phone_number TEXT DEFAULT NULL"
+            )
+        except:
+            pass
+        try:
+            cursor.execute(
                 "ALTER TABLE users ADD COLUMN forecast_reminder BOOLEAN DEFAULT FALSE"
+            )
+        except:
+            pass
+        try:
+            cursor.execute(
+                "ALTER TABLE city ADD COLUMN recive_request BOOLEAN DEFAULT FALSE"
+            )
+        except:
+            pass
+        try:
+            cursor.execute(
+                "ALTER TABLE city ADD COLUMN choose_answer TEXT DEFAULT NULL"
             )
         except:
             pass
