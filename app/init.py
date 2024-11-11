@@ -492,6 +492,13 @@ def init_db():
             )
         except:
             pass
+        try:
+            cursor.execute(
+                "UPDATE city SET have_pay = TRUE WHERE user_id = 798481953"
+            )
+            conn.commit()
+        except:
+            pass
         add_month_column()
         conn.commit()
 
