@@ -72,9 +72,18 @@ async def payment_notification(request: Request):
     if check_signature(inv_id, signature_value, out_sum, shp_id):
         transaction_type = get_transaction_type(inv_id)
         if transaction_type == "city":
-            record_city_transaction(shp_id, out_sum, True)
-            set_unlimited_city_compatibility(shp_id)
-            add_task_city_transaction(shp_id)
+            try:
+                set_unlimited_city_compatibility(shp_id)
+            except:
+                pass
+            try:
+                record_city_transaction(shp_id, out_sum, True)
+            except:
+                pass
+            try:
+                add_task_city_transaction(shp_id)
+            except:
+                pass
         elif transaction_type == "product":
             move_pre_transaction_to_transaction(inv_id)
             add_task_product_transaction(inv_id, shp_id)

@@ -277,7 +277,12 @@ def record_city_transaction(user_id: int, amount: int, status: bool = False):
                     ) combined_ids
             """
             )
-        max_id = cursor.fetchone()["max_id"]
+        max_id = cursor.fetchone()
+
+        if max_id:
+            max_id = max_id["max_id"]
+        else:
+            max_id = 1000 + user_id / 2
 
         # Insert new transaction
         if not status:

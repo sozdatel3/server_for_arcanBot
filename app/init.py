@@ -28,6 +28,16 @@ def init_db():
         )
         cursor.execute(
             """
+            CREATE TABLE IF NOT EXISTS every_day_stat (
+                id INTEGER PRIMARY KEY,
+                date TEXT,
+                actions_count INTEGER DEFAULT 0,
+                unique_users INTEGER DEFAULT 0
+            )
+        """
+        )
+        cursor.execute(
+            """
             CREATE TABLE IF NOT EXISTS important_mes_id (
                 id INTEGER PRIMARY KEY,
                 message_id INTEGER DEFAULT 0,

@@ -52,3 +52,9 @@ def set_important_mes_id(
 ):
     statistics_crud.set_important_mes_id(mes_name, message_id)
     return {"status": 200}
+
+
+@router.get("/update-stat-every-day", response_model=dict)
+def update_stat_every_day():
+    statistics_crud.clean_stat_and_put_today_date()
+    return {"status": 200}

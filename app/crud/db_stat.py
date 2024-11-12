@@ -173,6 +173,44 @@ def incriment_stat_counter(counter_id: int):
 
 
 @custom_logger.log_db_operation
+def clean_stat_and_put_today_date():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        # cursor.execute("SELECT UNIQUE(id) FROM stat")
+        # Получаем количество уникальных пользователей
+        cursor.execute("SELECT DISTINCT id FROM stat")
+        count_of_users = (
+            len(unique_ids) if (unique_ids := cursor.fetchall()) else 0
+        )
+        if res := cursor.execute(
+            "SELECT COALESCE(SUM(counter), 0) FROM stat"
+        ).fetchone():
+            action_count = res[0]
+        else:
+            action_count = 0
+
+        cursor.execute("DELETE FROM stat")
+        conn.commit()
+        cursor.execute(
+            "INSERT INTO every_day_stat (date, actions_count, unique_users) VALUES (?, ?, ?)",
+            (
+                datetime.now().strftime("%d.%m.%Y"),
+                action_count,
+                count_of_users,
+            ),
+        )
+        conn.commit()
+
+
+@custom_logger.log_db_operation
+def del_stat():
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM stat")
+        conn.commit()
+
+
+@custom_logger.log_db_operation
 def get_all_count():
     with get_db_connection() as conn:
         cursor = conn.cursor()
