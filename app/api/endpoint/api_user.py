@@ -234,12 +234,12 @@ def check_received_one_file(user_id: int):
     return {"received_one_file": status}
 
 
-@router.get("/{user_id}/nik", response_model=dict)
+@router.get("/nik/{user_id}", response_model=dict)
 def get_user_nik(user_id: int):
     nik = users_crud.get_nik(user_id)
     if nik is None:
         raise HTTPException(
-            status_code=404, detail="Nik not found for this user"
+            status_code=405, detail="Nik not found for this user"
         )
     return {"nik": nik}
 

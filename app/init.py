@@ -509,6 +509,13 @@ def init_db():
             conn.commit()
         except:
             pass
+        try:
+            cursor.execute(
+                "ALTER TABLE new_year_competition ADD COLUMN status TEXT DEFAULT NULL"
+            )
+            conn.commit()
+        except:
+            pass
         add_month_column()
         conn.commit()
 

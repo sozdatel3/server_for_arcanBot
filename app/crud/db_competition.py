@@ -136,6 +136,31 @@ def set_subscribe(user_id: int, subscribe: bool):
 
 
 @custom_logger.log_db_operation
+def set_status(user_id: int, status: str):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "UPDATE new_year_competition SET status = ? WHERE user_id = ?",
+            (status, user_id),
+        )
+        conn.commit()
+
+
+@custom_logger.log_db_operation
+def get_status(user_id: int):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT status FROM new_year_competition WHERE user_id = ?",
+            (user_id,),
+        )
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        return False
+
+
+@custom_logger.log_db_operation
 def increment_count_of_friends(user_id: int):
     with get_db_connection() as conn:
         cursor = conn.cursor()
@@ -158,3 +183,38 @@ def get_count_of_friends(user_id: int) -> int:
         if result:
             return result[0]
         return 0
+
+
+@custom_logger.log_db_operation
+def get_user_by_secret_link(secret_link: str) -> int:
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT user_id FROM new_year_competition WHERE secret_link = ?",
+            (secret_link,),
+        )
+        result = cursor.fetchone()
+        if result:
+            return result[0]
+        return 0
+
+
+@custom_logger.log_db_operation
+def get_all_users_status(status: str):
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        result = cursor.execute(
+            "SELECT user_id, inst_username, count_of_friends, should_send_message FROM new_year_competition WHERE status = ?",
+            (status,),
+        ).fetchall()
+        if result:
+            return [
+                {
+                    "user_id": row[0],
+                    "inst_username": row[1],
+                    "count_of_friends": row[2],
+                    "should_send_message": row[3],
+                }
+                for row in result
+            ]
+        return []

@@ -55,3 +55,30 @@ async def set_inst_username(user_id: int, inst_username: str):
 async def set_refer_id(user_id: int, refer_id: int):
     competition_crud.set_refer_id(user_id, refer_id)
     return {"message": "Refer id set successfully"}
+
+
+@router.post("/set-status/{user_id}/{status}", response_model=dict)
+async def set_status(user_id: int, status: str):
+    competition_crud.set_status(user_id, status)
+    return {"message": "Status set successfully"}
+
+
+@router.get("/get-status/{user_id}", response_model=dict)
+async def get_status(user_id: int):
+    return {"status": competition_crud.get_status(user_id)}
+
+
+@router.get("/get-user_id-by-secret-link/{secret_link}", response_model=dict)
+async def get_user_id_by_secret_link(secret_link: str):
+    return {"user_id": competition_crud.get_user_by_secret_link(secret_link)}
+
+
+@router.post("/increment-count-of-friends/{user_id}", response_model=dict)
+async def increment_count_of_friends(user_id: int):
+    competition_crud.increment_count_of_friends(user_id)
+    return {"message": "Count of friends incremented successfully"}
+
+
+@router.get("/get-all-users/{status}", response_model=dict)
+async def get_all_users_status(status: str):
+    return {"users": competition_crud.get_all_users_status(status)}
